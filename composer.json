@@ -1,0 +1,22 @@
+{
+    "name": "xtompie/validation",
+    "type": "library",
+    "description": "Validation component",
+    "keywords": ["validation", "input"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tomasz Pielczyk",
+            "email": "tomasz.pielczyk@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Xtompie\\Validation\\": "src"
+        }
+    },
+    "require": {
+        "php": ">=8.0",
+        "xtompie/result": "^1.0"
+    }
+}
