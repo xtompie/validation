@@ -106,6 +106,24 @@ Validation::new()
 
 All list validator in source
 
+### Scalars
+
+```php
+$ok = Validation::of($email)->required()->email()->success();
+```
+
+If no target is provided, then the main target, validation subject, will be used.
+
+### Validation feedback
+
+```php
+$v = Validation::new();
+$v->result(); // Xtompie\Result\Result
+$v->errors(); // Xtompie\Result\ErrorCollection
+$v->error(); // ?Xtompie\Result\Error
+$v->success(); // bool
+$v->fail(); // bool
+```
 ### Extending
 
 ```php
