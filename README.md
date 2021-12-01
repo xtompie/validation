@@ -55,7 +55,7 @@ Validation::of($input)
     ;
 ```
 
-If an error occurs during group validation, subsequent groups will not be validated nad validation will stop.
+If an error occurs during group validation, subsequent groups will not be validated and validation will stop.
 
 ### Targets
 
@@ -97,10 +97,9 @@ Validation::new()
 Validation::new()
     ->key('name')
     // raw validator, validator return Error on error otherwise null
-    ->validator(fn ($value) => strlen($value) === 13 ? Error::of('Length can not be 13') : null)
+    ->validator(fn ($value) => strlen($value) !== 13 ? null : Error::of('Length can not be 13'))
     // custom callback
-    ->callback(fn ($value) => strlen($value) !== 13 , 'Length can not be 13')
-    //
+    ->callback(fn ($value) => strlen($value) !== 13, 'Length can not be 13')
     ->notBlank('Fill name!')
 ;
 ```
