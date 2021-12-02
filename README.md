@@ -41,6 +41,7 @@ Validation subject can be provided by
 ```php
 Validation::of($input);
 Validation::new()->subject($input);
+Validation::new()->validate($input);
 ```
 
 ### Groups

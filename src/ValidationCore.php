@@ -108,6 +108,12 @@ class ValidationCore
         return $this->validator->validate($this->subject);
     }
 
+    public function validate(mixed $subject): Result
+    {
+        $this->subject($subject);
+        return $this->result();
+    }
+
     public function errors(): ErrorCollection
     {
         return $this->result()->errors();

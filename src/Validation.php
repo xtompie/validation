@@ -11,7 +11,7 @@ class Validation extends ValidationCore
     public function required(): static
     {
         $this->validator->required(true);
-        return $this->notBlank();
+        return $this->notBlank('This value must not be blank', 'required');
     }
 
     public function notBlank(string $msg = 'This value must not be blank', string $key = 'not_blank'): static
@@ -28,6 +28,11 @@ class Validation extends ValidationCore
                 return Error::of(str_replace("{min}", (string)$min, $msg), $key);
             }
         });
+    }
+
+    public function digit($msg = 'Only digits allowed', $key = 'digit'): static
+    {
+        return $this->validator(fn($v) => ctype_digit($v) ? null : Error::of($msg, $key));
     }
 
     public function callback(callable $callback, string $msg = '', string $key = ''): static
