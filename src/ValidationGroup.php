@@ -7,21 +7,21 @@ namespace Xtompie\Validation;
 use Xtompie\Result\Error;
 use Xtompie\Result\ErrorCollection;
 
-class Group
+class ValidationGroup
 {
     public function __construct(
         protected array $targets = [],
     ) {}
 
-    public function target(): Target
+    public function target(): ValidationTarget
     {
         if (!$this->targets) {
-            $this->targets[] = new MainTarget();
+            $this->targets[] = new ValidationMainTarget();
         }
         return array_values(array_slice($this->targets, -1))[0];
     }
 
-    public function add(Target $target)
+    public function add(ValidationTarget $target)
     {
         $this->targets[] = $target;
     }

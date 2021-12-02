@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Xtompie\Validation;
 
-class MethodTarget extends Target
+class ValidationMethodTarget extends ValidationTarget
 {
     public function __construct(
         protected string $method,

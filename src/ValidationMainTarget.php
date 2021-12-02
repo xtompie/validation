@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Xtompie\Validation;
 
-class TakeTarget extends Target
+class ValidationMainTarget extends ValidationTarget
 {
     public function __construct(
-        protected $take,
-        protected ?string $space,
+        protected ?string $space = null,
     ) {}
 
     protected function value(mixed $subject): mixed
     {
-        return ($this->take)($subject);
+        return $subject;
     }
 
     protected function space(): ?string

@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace Xtompie\Validation;
 
-class KeyTarget extends Target
+class ValidationPropertyTarget extends ValidationTarget
 {
     public function __construct(
-        protected string $key,
+        protected string $property,
     ) {}
 
     protected function value(mixed $subject): mixed
     {
-        if (!is_array($subject) || !array_key_exists($this->key, $subject)) {
+        if (!is_object($subject) && !isset($subject->{$this->property})) {
             return null;
         }
-        return $subject[$this->key];
+        return $subject->{$this->property};
     }
 
     protected function space(): ?string
     {
-        return $this->key;
+        return $this->property;
     }
 }

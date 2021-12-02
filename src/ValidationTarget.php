@@ -6,7 +6,7 @@ namespace Xtompie\Validation;
 
 use Xtompie\Result\Error;
 
-abstract class Target
+abstract class ValidationTarget
 {
     protected $required = false;
     protected $filters = [];

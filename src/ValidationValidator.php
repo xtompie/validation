@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Xtompie\Validation;
 
-use Xtompie\Result\ErrorCollection;
 use Xtompie\Result\Result;
 
 class ValidationValidator
 {
     protected array $groups = [];
 
-    public function group(): Group
+    public function group(): ValidationGroup
     {
         if (!$this->groups) {
             $this->addGroup();
@@ -19,23 +18,23 @@ class ValidationValidator
         return array_values(array_slice($this->groups, -1))[0];
     }
 
-    public function target(): Target
+    public function target(): ValidationTarget
     {
         return $this->group()->target();
     }
 
     public function addGroup()
     {
-        $this->groups[] = new Group();
+        $this->groups[] = new ValidationGroup();
     }
 
-    public function addTarget(Target $target)
+    public function addTarget(ValidationTarget $target)
     {
         return $this->group()->add($target);
     }
 
     /**
-     * @return Group[]
+     * @return ValidationGroup[]
      */
     public function groups(): array
     {
