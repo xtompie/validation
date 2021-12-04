@@ -15,18 +15,28 @@ class ValidationCore
 
     public static function of(mixed $subject): static
     {
-        return new static($subject);
+        return new static(new ValidationValidator(), $subject);
+    }
+
+    public static function ofValidator(ValidationValidator $validator): static
+    {
+        return new static($validator, null);
     }
 
     public static function new(): static
     {
-        return new static();
+        return new static(new ValidationValidator(), null);
     }
 
-    public function __construct(mixed $subject = null)
+    public function __construct(ValidationValidator $validator, mixed $subject)
     {
+        $this->validator = $validator;
         $this->subject = $subject;
-        $this->validator = new ValidationValidator();
+    }
+
+    public function validationValidator(): ValidationValidator
+    {
+        return $this->validationValidator;
     }
 
     public function subject(mixed $subject): static

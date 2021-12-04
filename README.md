@@ -127,6 +127,16 @@ $v->fail(); // bool
 ```
 ### Extending
 
+Component consists of 3 elements.
+
+1. ValidationValidator - builder and validator.
+2. ValidationCore - wrapper for the ValidationValidator. Gives fluent syntax, deals with validation subject.
+3. Validation - extends ValidationCore by inheritance. Gives concrete validations, filters, messages, keys.
+
+#### Inheritance
+
+Validation or ValidationCore can be extended by inheritance.
+
 ```php
 
 namespace App\Core\Validation;
@@ -147,6 +157,8 @@ class Validation extends BaseValidation
 }
 ```
 
+#### Facade
+
 ```php
 
 namespace App\Import\Foobar;
@@ -155,14 +167,31 @@ use App\Core\Validation\Validation as BaseValidation;
 
 class Validation extends BaseValidation
 {
-    public function email(): static
+    public function typePhone(): static
     {
-        return $this->property('email')->required()->trim()->digit();
+        return $this->required()->trim()->digit();
     }
 }
 ```
 
-### Default messages customize
+#### Model
+
+```php
+
+namespace App\Import\Foobar;
+
+use App\Core\Validation\Validation as BaseValidation;
+
+class ModelValidation extends BaseValidation
+{
+    public function phone(): static
+    {
+        return $this->property('phone')->required()->trim()->digit();
+    }
+}
+```
+
+#### Default messages customize
 
 ```php
 
@@ -177,4 +206,36 @@ class Validation extends BaseValidation
         return parent::notBlank($msg, $key);
     }
 }
+```
+
+#### Switch context
+
+
+```php
+use Xtompie\Validation\Validation;
+
+class CoreValidation extends Validation
+{
+    public function notBlank(string $msg = 'Field required', string $key = 'not_blank'): static
+    {
+        return parent::notBlank($msg, $key);
+    }
+}
+
+class CLIValidation extends Validation
+{
+    public function myCustomValidator(): static
+    {
+        return $this->validator(fn($v) => /* ...*/);
+    }
+}
+
+$coreValidation = CoreValidation::new();
+$coreValidation->property('a')->notBlank();
+
+$cliValidation = CoreValidation::ofValidator($coreValidation->validationValidator());
+$cliValidation->property('b')->myCustomValidator();
+
+$coreValidation = CoreValidation::ofValidator($validation->validationValidator());
+
 ```
