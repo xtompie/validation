@@ -230,12 +230,14 @@ class CLIValidation extends Validation
     }
 }
 
-$coreValidation = CoreValidation::new();
-$coreValidation->property('a')->notBlank();
+$validation = CoreValidation::new();
+$validation->property('a')->notBlank();
 
-$cliValidation = CoreValidation::ofValidator($coreValidation->validationValidator());
-$cliValidation->property('b')->myCustomValidator();
+// swtich to CLIValidation
+$validation = CLIValidation::ofValidator($validation->validationValidator());
+$validation->property('b')->myCustomValidator();
 
-$coreValidation = CoreValidation::ofValidator($validation->validationValidator());
+// switch back to CoreValidation
+$validation = CoreValidation::ofValidator($validation->validationValidator());
 
 ```
