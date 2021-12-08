@@ -97,8 +97,8 @@ Validation::new()
 ```php
 Validation::new()
     ->key('name')
-    // raw validator, validator return Error on error otherwise null
-    ->validator(fn ($value) => strlen($value) !== 13 ? null : Error::of('Length can not be 13'))
+    // raw validator, validator return Result
+    ->validator(fn ($value) => strlen($value) !== 13 ? Result::ofSuccess() : Result::ofErrorMsg('Length can not be 13'))
     // custom callback
     ->callback(fn ($value) => strlen($value) !== 13, 'Length can not be 13')
     ->notBlank('Fill name!')
@@ -121,7 +121,7 @@ If no target is provided, then the main target, validation subject, will be used
 $v = Validation::new();
 $v->result(); // Xtompie\Result\Result
 $v->errors(); // Xtompie\Result\ErrorCollection
-$v->error(); // ?Xtompie\Result\Error
+$v->error(); // ?Xtompie\Result\Error first error
 $v->success(); // bool
 $v->fail(); // bool
 ```
@@ -152,7 +152,7 @@ class Validation extends BaseValidation
 
     public function digit($msg = 'Only digits allowed', $key = 'digit'): static
     {
-        return $this->validator(fn($v) => ctype_digit($v) ? null : Error::of($msg, $key));
+        return $this->validator(fn($v) => ctype_digit($v) ? Result::ofSucces() : Result::ofErrorMsg($msg, $key));
     }
 }
 ```
