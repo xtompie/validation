@@ -94,7 +94,7 @@ class ValidationCore
     }
 
     /**
-     * @param callable $validator `(mixed $value): ?App\Core\Error` null on success otherwise Error
+     * @param callable $validator `(mixed $value): ?App\Core\Result`
      * @return static
      */
     public function validator(callable $validator): static

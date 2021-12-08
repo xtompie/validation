@@ -6,6 +6,7 @@ namespace Xtompie\Validation;
 
 use Xtompie\Result\Error;
 use Xtompie\Result\ErrorCollection;
+use Xtompie\Result\Result;
 
 class ValidationGroup
 {
@@ -26,15 +27,12 @@ class ValidationGroup
         $this->targets[] = $target;
     }
 
-    public function validate(mixed $subject): ErrorCollection
+    public function validate(mixed $subject): Result
     {
-        $errors = ErrorCollection::ofEmpty();
-        foreach ($this->targets as $target) {
-            $error = $target->validate($subject);
-            if ($error instanceof Error) {
-                $errors = $errors->add($error);
-            }
-        }
-        return $errors;
+        return array_reduce(
+            $this->targets,
+            fn(Result $carry, ValidationTarget $item) => Result::ofCombine($carry, $item->validate($subject)),
+            Result::ofSuccess()
+        );
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Xtompie\Validation;
 
-use Xtompie\Result\Error;
+use Xtompie\Result\Result;
 
 abstract class ValidationTarget
 {
@@ -30,12 +30,12 @@ abstract class ValidationTarget
         $this->validators[] = $validator;
     }
 
-    public function validate(mixed $subject): ?Error
+    public function validate(mixed $subject): Result
     {
         $value = $this->value($subject);
 
         if (!$this->required && $this->isBlank($value)) {
-            return null;
+            return Result::ofSuccess();
         }
 
         foreach ($this->filters as $filter) {
@@ -43,13 +43,18 @@ abstract class ValidationTarget
         }
 
         foreach ($this->validators as $validator) {
-            $error = $validator($value);
-            if ($error instanceof Error) {
-                return $error->withSpace($this->space());
+            /** @var Result $result */
+            $result = $validator($value);
+            if ($result->fail()) {
+                return Result::ofErrors(
+                    $this->space() !== null
+                        ? $result->errors()->withPrefix($this->space())
+                        : $result->errors()
+                );
             }
         }
 
-        return null;
+        return Result::ofSuccess();
     }
 
     protected function isBlank($value): bool

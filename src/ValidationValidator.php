@@ -63,10 +63,10 @@ class ValidationValidator
 
     public function validate(mixed $subject): Result
     {
-        foreach ($this->groups as $group) {
-            $errors = $group->validate($subject);
-            if ($errors->any()) {
-                return Result::ofErrors($errors);
+        foreach ($this->groups() as $group) {
+            $result = $group->validate($subject);
+            if ($result->fail()) {
+                return $result;
             }
         }
         return Result::ofValue($subject);
