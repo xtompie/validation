@@ -6,14 +6,26 @@ namespace Xtompie\Validation;
 
 use Xtompie\Result\Result;
 
-abstract class ValidationTarget
+class ValidationTarget
 {
     protected $required = false;
     protected $filters = [];
     protected $validators = [];
 
-    abstract protected function value(mixed $subject): mixed;
-    abstract protected function space(): ?string;
+    public function __construct(
+        protected $take,
+        protected ?string $space,
+    ) {}
+
+    protected function value(mixed $subject): mixed
+    {
+        return ($this->take)($subject);
+    }
+
+    protected function space(): ?string
+    {
+        return $this->space;
+    }
 
     public function required(bool $required)
     {

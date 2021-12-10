@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Xtompie\Validation;
 
-use Xtompie\Result\Error;
-use Xtompie\Result\ErrorCollection;
 use Xtompie\Result\Result;
 
 class ValidationGroup
@@ -17,7 +15,7 @@ class ValidationGroup
     public function target(): ValidationTarget
     {
         if (!$this->targets) {
-            $this->targets[] = new ValidationMainTarget();
+            $this->targets[] = new ValidationTarget(fn (mixed $subject) => $subject, null);
         }
         return array_values(array_slice($this->targets, -1))[0];
     }

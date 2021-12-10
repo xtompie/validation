@@ -33,6 +33,43 @@ class ValidationValidator
         return $this->group()->add($target);
     }
 
+    public function method(string $name)
+    {
+        $this->addTarget(new ValidationTarget(
+            fn (mixed $subject) => is_callable([$subject, $name]) ? $subject->{$name}() : null,
+            $name
+        ));
+    }
+
+    public function property(string $name)
+    {
+        $this->addTarget(new ValidationTarget(
+            fn (mixed $subject) => is_object($subject) && isset($subject->$name) ? $subject->$name : null,
+            $name
+        ));
+    }
+
+    public function key(string $name)
+    {
+        $this->addTarget(new ValidationTarget(
+            fn (mixed $subject) => is_array($subject) && array_key_exists($name, $subject) ? $subject[$name] : null,
+            $name
+        ));
+    }
+
+    public function take(callable $taker, $space = null)
+    {
+        $this->addTarget(new ValidationTarget($taker, $space));
+    }
+
+    public function main(string $space)
+    {
+        $this->addTarget(new ValidationTarget(
+            fn (mixed $subject) => $subject,
+            $space
+        ));
+    }
+
     /**
      * @return ValidationGroup[]
      */

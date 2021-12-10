@@ -53,31 +53,31 @@ class ValidationCore
 
     public function method(string $name): static
     {
-        $this->validator->addTarget(new ValidationMethodTarget($name));
+        $this->validator->method($name);
         return $this;
     }
 
     public function property(string $name): static
     {
-        $this->validator->addTarget(new ValidationPropertyTarget($name));
+        $this->validator->property($name);
         return $this;
     }
 
     public function key(string $name): static
     {
-        $this->validator->addTarget(new ValidationKeyTarget($name));
+        $this->validator->key($name);
         return $this;
     }
 
     public function take(callable $taker, $space = null): static
     {
-        $this->validator->addTarget(new ValidationTakeTarget($taker, $space));
+        $this->validator->take($taker, $space);
         return $this;
     }
 
     public function main(string $space): static
     {
-        $this->validator->addTarget(new ValidationMainTarget($space));
+        $this->validator->main($space);
         return $this;
     }
 
