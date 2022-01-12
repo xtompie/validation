@@ -64,12 +64,12 @@ class Validation extends ValidationCore
         return $this->validator(fn (mixed $v) => $this->test(filter_var($v, FILTER_VALIDATE_EMAIL) !== false, 'email', $msg));
     }
 
-    public function min(int $min, string $msg = null): static
+    public function min(int $min, ?string $msg = null): static
     {
         return $this->validator(fn (mixed $v) => $this->test($v >= $min, 'min', $msg, ['{min}' => $min]));
     }
 
-    public function max(int $max, string $msg = null): static
+    public function max(int $max, ?string $msg = null): static
     {
         return $this->validator(fn (mixed $v) => $this->test($v <= $max, 'max', $msg, ['{max}' => $max]));
     }
@@ -81,7 +81,7 @@ class Validation extends ValidationCore
         );
     }
 
-    public function regex(string $regex, string $msg = null): static
+    public function regex(string $regex, ?string $msg = null): static
     {
         return $this->validator(fn(mixed $v) => $this->test(preg_match($regex, $v), 'callback', $msg));
     }
