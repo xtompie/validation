@@ -86,9 +86,9 @@ class Validation extends ValidationCore
         return $this->validator(fn(mixed $v) => $this->test(preg_match($regex, $v), 'callback', $msg));
     }
 
-    public function required(): static
+    public function required(?string $msg = null, string $key = 'required'): static
     {
         $this->validator->required(true);
-        return $this->notBlank(null, 'required');
+        return $this->notBlank($msg, $key);
     }
 }
