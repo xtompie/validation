@@ -4,18 +4,44 @@ declare(strict_types=1);
 
 namespace Xtompie\Validation;
 
+use Xtompie\Result\Error;
+use Xtompie\Result\ErrorCollection;
 use Xtompie\Result\Result;
 
 class Validation extends ValidationCore
 {
-    protected function msg(string $key, array $replace = []): ?string
+    protected function  msgs(): array
+    {
+        return [
+            'array' => 'Value must be of array type',
+            'array_of_strings' => 'Value must be an array of strings',
+            'callback' => 'Value is not valid',
+            'choice' => 'Value must be a one of {choices}.',
+            'choice_multi' => 'Values {{values}} must be a one of: {{choices}}',
+            'digit' => 'Only digits allowed',
+            'email' => 'value is not a valid email address',
+            'length' => 'Value should  have exacly {length} characters',
+            'length_min' => 'Value should have {min} characters or more',
+            'length_max' => 'Value should have {max} characters or less',
+            'max' => 'Value should be less than or equal {min}',
+            'min' => 'Value should be greather than or equal {min}',
+            'not_blank' => 'Value must not be blank',
+            'only' => 'Invalid key: {key}',
+            'regex' => 'Value is not valid',
+            'required' => 'Value must not be blank',
+            'string' => 'Value must be of string type',
+        ];
+    }
+
+    protected function msg(string $key): ?string
     {
         $msgs = $this->msgs();
-        if (!isset($msgs[$key])) {
-            return null;
-        }
+        return $msgs[$key] ?? null;
+    }
 
-        $msg = $msgs[$key];
+    protected function errormsg(string $key, array $replace = [], ?string $msg = null): ?string
+    {
+        $msg = $msg ?? $this->msg($key);
 
         if ($replace) {
             $msg = str_replace(array_keys($replace), array_values($replace), $msg);
@@ -24,35 +50,53 @@ class Validation extends ValidationCore
         return $msg;
     }
 
-    protected function msgs(): array
-    {
-        return [
-            'callback' => 'Value is not valid',
-            'digit' => 'Only digits allowed',
-            'email' => 'value is not a valid email address',
-            'max' => 'Value should be less than or equal {min}',
-            'min' => 'Value should be greather than or equal {min}',
-            'not_blank' => 'Value must not be blank',
-            'regex' => 'Value is not valid',
-            'required' => 'Value must not be blank',
-        ];
-    }
-
-    protected function test(bool $assert, string $key, ?string $msg = null, array $replace = []): Result
-    {
-        return $assert
-            ? Result::ofSuccess()
-            : Result::ofErrorMsg(
-                $msg !== null ? $msg : $this->msg($key, $replace),
-                $key
-            )
-        ;
-    }
-
     public function callback(callable $callback, string $msg = null): static
     {
         return $this->validator(fn(mixed $v) => $this->test($callback($v), 'callback', $msg));
     }
+
+    public function pipe(callable $pipe): static
+    {
+        return $pipe($this);
+    }
+
+    protected function test(bool $assert, string $key, ?string $msg = null, array $replace = []): Result
+    {
+        return $assert ? Result::ofSuccess() : Result::ofErrorMsg($this->errormsg($key, $replace, $msg), $key);
+    }
+
+    public function array($msg = null): static
+    {
+        return $this->validator(fn($v) => $this->test(is_array($v), 'array', $msg));
+    }
+
+    public function arrayOfStrings($msg = null): static
+    {
+        return $this->validator(fn($v) => $this->test(
+            is_array($v) && count(array_filter($v, fn ($i) => !is_string($i))) === 0,
+            'array_of_strings',
+            $msg
+        ));
+    }
+
+    public function choice(array $choices, ?string $msg = null): static
+    {
+        return $this->validator(fn($v) => $this->test(in_array($v, $choices), 'choice', $msg, [
+            '{choices}' => '\'' . implode('\', \'', $choices) . '\''
+        ]));
+    }
+
+    public function choiceMulti(array $choices, ?string $msg = null): static
+    {
+        return $this->validator(function(array $values) use ($choices, $msg) {
+            $invalids = array_filter($values, fn ($value) => !in_array($value, $choices));
+            return !$invalids ? Result::ofSuccess() : Result::ofErrorMsg(
+                $this->errormsg('choice_multi', ['{values}' => implode(', ', $invalids), '{choices}' => implode(', ', $choices)], $msg),
+                'choice_multi',
+            );
+        });
+    }
+
 
     public function digit(?string $msg = null): static
     {
@@ -62,6 +106,21 @@ class Validation extends ValidationCore
     public function email(?string $msg = null): static
     {
         return $this->validator(fn (mixed $v) => $this->test(filter_var($v, FILTER_VALIDATE_EMAIL) !== false, 'email', $msg));
+    }
+
+    public function length(int $length, ?string $msg = null): static
+    {
+        return $this->validator(fn (mixed $v) => $this->test(strlen((string)$v) == $length, 'length', $msg, ['{length}' => $length]));
+    }
+
+    public function lengthMin(int $min, ?string $msg = null): static
+    {
+        return $this->validator(fn (mixed $v) => $this->test(strlen((string) $v) >= $min, 'length_min', $msg, ['{min}' => $min]));
+    }
+
+    public function lengthMax(int $max, ?string $msg = null): static
+    {
+        return $this->validator(fn (mixed $v) => $this->test(strlen((string) $v) <= $max, 'length_max', $msg, ['{max}' => $max]));
     }
 
     public function min(int $min, ?string $msg = null): static
@@ -81,6 +140,19 @@ class Validation extends ValidationCore
         );
     }
 
+    public function only(array $keys, ?string $msg = null): static
+    {
+        return $this->validator(function(array $array) use ($keys, $msg) {
+            $invalid = array_filter(array_keys($array), fn ($key) => !in_array($key, $keys));
+            return !$invalid ? Result::ofSuccess() : Result::ofErrors(new ErrorCollection(
+                array_map(
+                    fn ($key) => Error::of($this->errormsg('only', ['{key}' => $key], $msg), 'only', $key),
+                    $invalid
+                )
+            ));
+        });
+    }
+
     public function regex(string $regex, ?string $msg = null): static
     {
         return $this->validator(fn(mixed $v) => $this->test(preg_match($regex, $v), 'callback', $msg));
@@ -90,5 +162,10 @@ class Validation extends ValidationCore
     {
         $this->validator->required(true);
         return $this->notBlank($msg, $key);
+    }
+
+    public function string($msg = null): static
+    {
+        return $this->validator(fn($v) => $this->test(is_string($v), 'string', $msg));
     }
 }

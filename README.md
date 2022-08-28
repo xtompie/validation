@@ -12,6 +12,7 @@ use Xtompie\Validation\Validation;
 $result = Validation::of($input)
     ->key('email')->required()->email()
     ->key('password')->required()->min(3)
+    ->group()
     ->main('password')->callback(fn($input) => $input['email'] != $input['password'])
     ->group()
     ->key('email')->callback(fn($email) => !inUse($email))
@@ -125,6 +126,7 @@ $v->error(); // ?Xtompie\Result\Error first error
 $v->success(); // bool
 $v->fail(); // bool
 ```
+
 ### Extending
 
 Component consists of 3 elements.
@@ -139,12 +141,24 @@ Validation or ValidationCore can be extended by inheritance.
 
 ```php
 
-namespace App\Core\Validation;
+namespace App\Shared\Validation;
 
+use App\Shared\Dao\Dao;
 use Xtompie\Validation\Validation as BaseValidation;
 
 class Validation extends BaseValidation
 {
+    public function __construct(
+        protected Dao $dao,
+    ) {}
+
+    protected function msgs(): array
+    {
+        return array_merge(parent::msgs(), [
+            'dao_not_exists' => 'Value {value} already exists',
+        ]);
+    }
+
     public function trim(): static
     {
         return $this->filter(fn($v) => trim($v));
@@ -154,90 +168,42 @@ class Validation extends BaseValidation
     {
         return $this->validator(fn($v) => ctype_digit($v) ? Result::ofSucces() : Result::ofErrorMsg($msg, $key));
     }
-}
-```
 
-#### Facade
-
-```php
-
-namespace App\Import\Foobar;
-
-use App\Core\Validation\Validation as BaseValidation;
-
-class Validation extends BaseValidation
-{
-    public function typePhone(): static
+    public function daoNotExists(string $table, string $field, ?string $exceptId = null, ?string $msg = null)
     {
-        return $this->required()->trim()->digit();
-    }
-}
-```
-
-#### Model
-
-```php
-
-namespace App\Import\Foobar;
-
-use App\Core\Validation\Validation as BaseValidation;
-
-class ModelValidation extends BaseValidation
-{
-    public function phone(): static
-    {
-        return $this->property('phone')->required()->trim()->digit();
-    }
-}
-```
-
-#### Default messages customize
-
-```php
-
-namespace App\Core\Validation;
-
-use Xtompie\Validation\Validation as BaseValidation;
-
-class Validation extends BaseValidation
-{
-    public function notBlank(string $msg = 'Field required', string $key = 'not_blank'): static
-    {
-        return parent::notBlank($msg, $key);
-    }
-}
-```
-
-#### Switch context
-
-
-```php
-use Xtompie\Validation\Validation;
-
-class CoreValidation extends Validation
-{
-    public function notBlank(string $msg = 'Field required', string $key = 'not_blank'): static
-    {
-        return parent::notBlank($msg, $key);
+        return $this->validator(fn ($v) => $this->test(
+            !$this->dao->exists($table, [$field => $v, 'id !=' => $exceptId]),
+            'dao_not_exists',
+            $msg,
+            ['{value}' => $v]
+        ));
     }
 }
 
-class CLIValidation extends Validation
+namespace App\User\Application\Service;
+use App\Shared\Validation\Validation;
+
+class CreateUserService
 {
-    public function myCustomValidator(): static
+    public function __construct(
+        protected Validation $validation,
+    ) {}
+
+    public function __invoke(string $email): Result
     {
-        return $this->validator(fn($v) => /* ...*/);
+        $result = $this->validation->subject($email)
+            ->required()
+            ->email()
+            ->daoNotExists('user', 'email')
+        ;
+        if ($result->fail()) {
+            return $result;
+        }
+
+        // create user
+
+        return Result::ofSuccess();
     }
 }
-
-$validation = CoreValidation::new();
-$validation->property('a')->notBlank();
-
-// swtich to CLIValidation
-$validation = CLIValidation::ofValidator($validation->validationValidator());
-$validation->property('b')->myCustomValidator();
-
-// switch back to CoreValidation
-$validation = CoreValidation::ofValidator($validation->validationValidator());
 
 ```
