@@ -133,4 +133,57 @@ class ValidationTest extends TestCase
         // then
         $this->assertTrue($result->success());
     }
+
+    public function test_nested()
+    {
+        // given
+        $subject = ['person' => ['name' => 'John']];
+        $validation = Validation::new()
+            ->key('person')
+            ->nested()->key('name')->required()->lengthMin(2)
+        ;
+
+        // when
+        $result = $validation->validate($subject);
+
+        // then
+        $this->assertTrue($result->success());
+
+    }
+
+    public function test_nested_generated_space()
+    {
+        // given
+        $subject = ['person' => ['name' => 'John']];
+        $validation = Validation::new()
+            ->key('person')
+            ->nested()->key('name')->required()->lengthMin(10)
+        ;
+
+        // when
+        $space = $validation->validate($subject)->errors()->first()->space();
+
+        // then
+        $this->assertEquals('person.name', $space);
+
+    }
+
+    public function test_nested_generated_space_deep()
+    {
+        // given
+        $subject = ['person' => ['name' => ['first' => 'John']]];
+        $validation = Validation::new()
+            ->key('person')
+            ->nested()
+            ->key('name')
+            ->nested()->key('first')->required()->lengthMin(10)
+        ;
+
+        // when
+        $space = $validation->validate($subject)->errors()->first()->space();
+
+        // then
+        $this->assertEquals('person.name.first', $space);
+
+    }
 }

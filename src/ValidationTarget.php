@@ -11,20 +11,31 @@ class ValidationTarget
     protected $required = false;
     protected $filters = [];
     protected $validators = [];
+    protected ?ValidationTarget $precedent = null;
 
     public function __construct(
         protected $take,
         protected ?string $space,
     ) {}
 
-    protected function value(mixed $subject): mixed
+    public function value(mixed $subject): mixed
     {
+        if ($this->precedent) {
+            $subject = $this->precedent->value($subject);
+        }
         return ($this->take)($subject);
     }
 
-    protected function space(): ?string
+    public function space(): ?string
     {
-        return $this->space;
+        $prefix = null;
+        if ($this->precedent) {
+            $prefix = $this->precedent->space();
+            if ($prefix) {
+                $prefix = "$prefix.";
+            }
+        }
+        return $prefix . $this->space;
     }
 
     public function required(bool $required)
@@ -40,6 +51,11 @@ class ValidationTarget
     public function validator(callable $validator)
     {
         $this->validators[] = $validator;
+    }
+
+    public function precedent(ValidationTarget $precedent)
+    {
+        $this->precedent = $precedent;
     }
 
     public function validate(mixed $subject): Result

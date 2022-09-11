@@ -33,6 +33,11 @@ class ValidationValidator
         return $this->group()->add($target);
     }
 
+    public function nested(bool $nested)
+    {
+        $this->group()->nested($nested);
+    }
+
     public function method(string $name)
     {
         $this->addTarget(new ValidationTarget(
@@ -64,6 +69,7 @@ class ValidationValidator
 
     public function main(string $space)
     {
+        $this->nested(false);
         $this->addTarget(new ValidationTarget(
             fn (mixed $subject) => $subject,
             $space

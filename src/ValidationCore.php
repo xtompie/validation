@@ -51,6 +51,12 @@ class ValidationCore
         return $this;
     }
 
+    public function nested(): static
+    {
+        $this->validator->nested(true);
+        return $this;
+    }
+
     public function method(string $name): static
     {
         $this->validator->method($name);
@@ -75,8 +81,9 @@ class ValidationCore
         return $this;
     }
 
-    public function main(string $space): static
+    public function main(?string $space = null): static
     {
+        $this->validator->nested(false);
         $this->validator->main($space);
         return $this;
     }

@@ -71,6 +71,23 @@ Validation::new()
 ;
 ```
 
+### Nested Target
+
+Targets can be nested e.g.
+
+```php
+    $validation = Validation::of(['person' => ['name' => 'John']])
+        ->key('person')
+        ->nested()->key('name')->required()->lengthMin(10)
+    ;
+    $validation->errors()->first()->space(); // person.name
+```
+
+After nested() function targets are related to last target.
+Nested can be reset by `group()` or `main()` target.
+Space in error is automaticly generated.
+
+
 ### Filters
 
 Filters are applied before validators
