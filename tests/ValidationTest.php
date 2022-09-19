@@ -165,7 +165,6 @@ class ValidationTest extends TestCase
 
         // then
         $this->assertEquals('person.name', $space);
-
     }
 
     public function test_nested_generated_space_deep()
@@ -185,5 +184,40 @@ class ValidationTest extends TestCase
         // then
         $this->assertEquals('person.name.first', $space);
 
+    }
+
+    public function test_nested_many()
+    {
+        // given
+        $subject = ['person' => ['name' => 'John', 'email' => 'john.doe']];
+        $validation = Validation::new()
+            ->key('person')
+            ->nested()
+            ->key('name')->required()->lengthMin(10)
+            ->key('email')->required()->email()
+        ;
+
+        // when
+        $space = $validation->validate($subject)->errors()->toArray()[1]->space();
+
+        // then
+        $this->assertEquals('person.email', $space);
+    }
+
+    public function test_nested_reset()
+    {
+        // given
+        $subject = ['person' => ['name' => 'John'], 'id' => '1234'];
+        $validation = Validation::new()
+            ->key('person')->nested()->key('name')->required()
+            ->main()
+            ->key('id')->required()
+        ;
+
+        // when
+        $errors = $validation->validate($subject)->errors()->any();
+
+        // then
+        $this->assertFalse($errors);
     }
 }

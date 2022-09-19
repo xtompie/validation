@@ -10,7 +10,7 @@ class ValidationGroup
 {
     public function __construct(
         protected array $targets = [],
-        protected bool $nested = false,
+        protected ?ValidationTarget $nested = null,
     ) {}
 
     public function target(): ValidationTarget
@@ -24,14 +24,14 @@ class ValidationGroup
     public function add(ValidationTarget $target)
     {
         if ($this->nested && $this->targets) {
-            $target->precedent($this->target());
+            $target->precedent($this->nested);
         }
         $this->targets[] = $target;
     }
 
     public function nested(bool $nested)
     {
-        $this->nested = $nested;
+        $this->nested = $nested ? $this->target() : null;
     }
 
     public function validate(mixed $subject): Result

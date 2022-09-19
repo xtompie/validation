@@ -67,7 +67,7 @@ class ValidationValidator
         $this->addTarget(new ValidationTarget($taker, $space));
     }
 
-    public function main(string $space)
+    public function main(?string $space)
     {
         $this->nested(false);
         $this->addTarget(new ValidationTarget(
