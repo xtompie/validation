@@ -41,7 +41,7 @@ Validation subject can be provided by
 
 ```php
 Validation::of($input);
-Validation::new()->subject($input);
+Validation::new()->withSubject($input);
 Validation::new()->validate($input);
 ```
 
@@ -208,7 +208,7 @@ class CreateUserService
 
     public function __invoke(string $email): Result
     {
-        $result = $this->validation->subject($email)
+        $result = $this->validation->withSubject($email)
             ->required()
             ->email()
             ->daoNotExists('user', 'email')

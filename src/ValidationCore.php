@@ -34,15 +34,28 @@ class ValidationCore
         $this->subject = $subject;
     }
 
-    public function validationValidator(): ValidationValidator
+    public function withValidationValidator(ValidationValidator $validator): static
     {
-        return $this->validationValidator;
+        $new = clone $this;
+        $new->validator = $validator;
+        return $new;
     }
 
-    public function subject(mixed $subject): static
+    public function validationValidator(): ValidationValidator
     {
-        $this->subject = $subject;
-        return $this;
+        return $this->validator;
+    }
+
+    public function withSubject(mixed $subject): static
+    {
+        $new = clone $this;
+        $new->subject = $subject;
+        return $new;
+    }
+
+    public function subject(): mixed
+    {
+        return $this->subject();
     }
 
     public function group(): static
@@ -127,8 +140,7 @@ class ValidationCore
 
     public function validate(mixed $subject): Result
     {
-        $this->subject($subject);
-        return $this->result();
+        return $this->withSubject($subject)->result();
     }
 
     public function errors(): ErrorCollection
