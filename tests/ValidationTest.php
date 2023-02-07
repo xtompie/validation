@@ -220,4 +220,38 @@ class ValidationTest extends TestCase
         // then
         $this->assertFalse($errors);
     }
+
+    public function test_when_then_fired()
+    {
+        // given
+        $validation = Validation::of(['a' => 'string', 'b' => 42])
+            ->key('b')->when(
+                fn (array $subject) => $subject['a'] === 'string',
+                fn (Validation $v) => $v->string(),
+            )
+        ;
+
+        // when
+        $valid = $validation->success();
+
+        // then
+        $this->assertFalse($valid);
+    }
+
+    public function test_when_then_not_fired()
+    {
+        // given
+        $validation = Validation::of(['a' => 'int', 'b' => 42])
+            ->key('b')->when(
+                fn (array $subject) => $subject['a'] === 'string',
+                fn (Validation $v) => $v->string(),
+            )
+        ;
+
+        // when
+        $valid = $validation->success();
+
+        // then
+        $this->assertTrue($valid);
+    }
 }

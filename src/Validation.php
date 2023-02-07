@@ -10,14 +10,17 @@ use Xtompie\Result\Result;
 
 class Validation extends ValidationCore
 {
-    protected function  msgs(): array
+    protected function msgs(): array
     {
         return [
             'array' => 'Value must be of array type',
             'array_of_strings' => 'Value must be an array of strings',
+            'alnum' => 'Only alphanumeric allowed',
+            'alpha' => 'Only alphabetic allowed',
             'callback' => 'Value is not valid',
             'choice' => 'Value must be a one of {choices}.',
             'choice_multi' => 'Values {{values}} must be a one of: {{choices}}',
+            'date' => 'Date must be in {format} format',
             'digit' => 'Only digits allowed',
             'email' => 'value is not a valid email address',
             'length' => 'Value should  have exacly {length} characters',
@@ -50,14 +53,19 @@ class Validation extends ValidationCore
         return $msg;
     }
 
-    public function callback(callable $callback, string $msg = null): static
+    public function callback(callable $callback, string $msg = null, string $key = 'callback'): static
     {
-        return $this->validator(fn(mixed $v) => $this->test($callback($v), 'callback', $msg));
+        return $this->validator(fn(mixed $v) => $this->test($callback($v), $key, $msg));
     }
 
     public function pipe(callable $pipe): static
     {
         return $pipe($this);
+    }
+
+    public function when(callable $if, callable $then): static
+    {
+        return $this->pipe(fn (Validation $v) => $if($v->subject()) ? $then($v) : $v);
     }
 
     protected function test(bool $assert, string $key, ?string $msg = null, array $replace = []): Result
@@ -79,6 +87,16 @@ class Validation extends ValidationCore
         ));
     }
 
+    public function alnum(?string $msg = null): static
+    {
+        return $this->validator(fn (mixed $v) => $this->test(ctype_alnum($v), 'alnum', $msg));
+    }
+
+    public function alpha(?string $msg = null): static
+    {
+        return $this->validator(fn (mixed $v) => $this->test(ctype_alpha($v), 'alpha', $msg));
+    }
+
     public function choice(array $choices, ?string $msg = null): static
     {
         return $this->validator(fn($v) => $this->test(in_array($v, $choices), 'choice', $msg, [
@@ -97,6 +115,16 @@ class Validation extends ValidationCore
         });
     }
 
+    public function date(string $format, ?string $msg = null): static
+    {
+        return $this->validator(function (mixed $v) use ($format, $msg) {
+            $validator = new DateValidator($format);
+            return $validator->__invoke((string)$v)
+                ? Result::ofSuccess()
+                : Result::ofErrorMsg($this->errormsg('date', ['{format}' => $validator->hrFormat()], $msg), 'date')
+            ;
+        });
+    }
 
     public function digit(?string $msg = null): static
     {
