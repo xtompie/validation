@@ -55,7 +55,7 @@ class ValidationCore
 
     public function subject(): mixed
     {
-        return $this->subject();
+        return $this->subject;
     }
 
     public function group(): static
