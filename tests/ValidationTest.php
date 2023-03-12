@@ -204,6 +204,50 @@ class ValidationTest extends TestCase
         $this->assertEquals('person.email', $space);
     }
 
+    public function test_nested_deep()
+    {
+        // given
+        $subject = ['a' => ['b' => ['c' => 1]]];
+        $validation = Validation::new()
+            ->key('a')
+            ->nested()
+            ->key('b')
+            ->nested()
+            ->key('c')->min(2)
+        ;
+
+        // when
+        $space = $validation->validate($subject)->errors()->first()->space();
+
+        // then
+        $this->assertEquals('a.b.c', $space);
+    }
+
+    public function test_unested()
+    {
+        // given
+        $subject = ['a' => ['b' => ['c' => 3], 'b2' => 1]];
+        $validation = Validation::new()
+            ->key('a')
+                ->nested()
+                    ->key('b')
+                        ->nested()
+                            ->key('c')
+                                ->required()
+                                ->min(2)
+                        ->unested()
+                    ->key('b2')
+                        ->required()
+                        ->min(2)
+        ;
+
+        // when
+        $space = $validation->validate($subject)->errors()->first()->space();
+
+        // then
+        $this->assertEquals('a.b2', $space);
+    }
+
     public function test_nested_reset()
     {
         // given
@@ -253,5 +297,29 @@ class ValidationTest extends TestCase
 
         // then
         $this->assertTrue($valid);
+    }
+
+    public function test_each()
+    {
+        // given
+        $validation = Validation::of([
+            'user' => [
+                [
+                    'email' => 'john.doe@exmaple.com'
+                ],
+                [
+                ],
+                [
+                ],
+            ],
+        ])
+            ->key('user')->each(fn (Validation $v) => $v->key('email')->required()->email())
+        ;
+
+        // when
+        $errors = $validation->errors();
+
+        // then
+        $this->assertEquals('user.1.email', $errors->first()->space());
     }
 }

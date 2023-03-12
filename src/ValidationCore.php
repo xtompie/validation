@@ -58,6 +58,11 @@ class ValidationCore
         return $this->subject;
     }
 
+    public function targetSubject(): mixed
+    {
+        return $this->validationValidator()->target()->value($this->subject);
+    }
+
     public function group(): static
     {
         $this->validator->addGroup();
@@ -66,7 +71,13 @@ class ValidationCore
 
     public function nested(): static
     {
-        $this->validator->nested(true);
+        $this->validator->nested();
+        return $this;
+    }
+
+    public function unested(): static
+    {
+        $this->validator->unested();
         return $this;
     }
 
@@ -96,7 +107,7 @@ class ValidationCore
 
     public function main(?string $space = null): static
     {
-        $this->validator->nested(false);
+        $this->validator->resetNested();
         $this->validator->main($space);
         return $this;
     }

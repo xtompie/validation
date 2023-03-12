@@ -68,6 +68,17 @@ class Validation extends ValidationCore
         return $this->pipe(fn (Validation $v) => $if($v->subject()) ? $then($v) : $v);
     }
 
+    public function each(callable $item): static
+    {
+        $main = $this;
+        $main = $main->nested();
+        foreach (array_keys((array)$main->targetSubject()) as $offset) {
+            $main = $main->key((string)$offset)->nested()->pipe($item)->unested();
+        }
+        $main = $main->unested();
+        return $main;
+    }
+
     protected function test(bool $assert, string $key, ?string $msg = null, array $replace = []): Result
     {
         return $assert ? Result::ofSuccess() : Result::ofErrorMsg($this->errormsg($key, $replace, $msg), $key);

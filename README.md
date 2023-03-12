@@ -64,9 +64,9 @@ If an error occurs during group validation, subsequent groups will not be valida
 ```php
 Validation::new()
     ->main() // validation will target main subject
-    ->property($name) // when subject is an object, target property named $name
-    ->method($name) // when subject is an object, target getter method named $name
-    ->key($key) // when subject is an array, target array value where key is $key
+    ->property($name) // when subject is an object, will target property named $name
+    ->method($name) // when subject is an object, will target getter method named $name
+    ->key($key) // when subject is an array, will target array value where key is $key
     ->take($callback) // custom target $callback, as first argument main subject will be given
 ;
 ```
@@ -84,7 +84,8 @@ Targets can be nested e.g.
 ```
 
 After nested() function targets are related to last target.
-Nested can be reset by `group()` or `main()` target.
+Nested can be reset by `unested()`, `group()` or `main()` target.
+Nested can be composed in multiple levels downwards
 Space in error is automaticly generated.
 
 

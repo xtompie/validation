@@ -8,9 +8,13 @@ use Xtompie\Result\Result;
 
 class ValidationGroup
 {
+    /**
+     * @param ValidationTarget[] $targets
+     * @param ValidationTarget[] $nesteds
+     */
     public function __construct(
         protected array $targets = [],
-        protected ?ValidationTarget $nested = null,
+        protected array $nesteds =[],
     ) {}
 
     public function target(): ValidationTarget
@@ -23,15 +27,25 @@ class ValidationGroup
 
     public function add(ValidationTarget $target)
     {
-        if ($this->nested && $this->targets) {
-            $target->precedent($this->nested);
+        if ($this->nesteds) {
+            $target->precedent($this->nesteds[count($this->nesteds)-1]);
         }
         $this->targets[] = $target;
     }
 
-    public function nested(bool $nested)
+    public function nested(): void
     {
-        $this->nested = $nested ? $this->target() : null;
+        $this->nesteds[] = $this->target();
+    }
+
+    public function unested(): void
+    {
+        array_pop($this->nesteds);
+    }
+
+    public function resetNested(): void
+    {
+        $this->nesteds = [];
     }
 
     public function validate(mixed $subject): Result
