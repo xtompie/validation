@@ -194,7 +194,7 @@ class Validation extends ValidationCore
 
     public function regex(string $regex, ?string $msg = null): static
     {
-        return $this->validator(fn(mixed $v) => $this->test(preg_match($regex, $v), 'callback', $msg));
+        return $this->validator(fn(mixed $v) => $this->test(preg_match($regex, $v) === 1, 'callback', $msg));
     }
 
     public function required(?string $msg = null, string $key = 'required'): static

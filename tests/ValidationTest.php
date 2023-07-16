@@ -322,4 +322,16 @@ class ValidationTest extends TestCase
         // then
         $this->assertEquals('user.1.email', $errors->first()->space());
     }
+
+    public function test_regex()
+    {
+        // given
+        $validation = Validation::of('John42')->regex('#[a-zA-Z0-9]#');
+
+        // when
+        $valid = $validation->success();
+
+        // then
+        $this->assertTrue($valid);
+    }
 }
