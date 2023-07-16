@@ -334,4 +334,16 @@ class ValidationTest extends TestCase
         // then
         $this->assertTrue($valid);
     }
+
+    public function test_main_space_is_empty_string()
+    {
+        // given
+        $validation = Validation::of('')->required();
+
+        // when
+        $space = $validation->errors()->first()->space();
+
+        // then
+        $this->assertEquals('', $space);
+    }
 }
