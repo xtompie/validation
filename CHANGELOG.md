@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 4.1
+
+- loose email validation
+
+## 4.0.1
+
+- fix regexp validator
+
 ## 4.0
 
 - `nested()` takes no arguments

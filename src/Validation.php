@@ -144,7 +144,7 @@ class Validation extends ValidationCore
 
     public function email(?string $msg = null): static
     {
-        return $this->validator(fn (mixed $v) => $this->test(filter_var($v, FILTER_VALIDATE_EMAIL) !== false, 'email', $msg));
+        return $this->validator(fn (mixed $v) => $this->test(preg_match('/^.+\@\S+\.\S+$/', $v) === 1, 'email', $msg));
     }
 
     public function length(int $length, ?string $msg = null): static

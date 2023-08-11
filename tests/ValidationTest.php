@@ -346,4 +346,29 @@ class ValidationTest extends TestCase
         // then
         $this->assertEquals('', $space);
     }
+
+    public function test_email_success()
+    {
+        // given
+        $validation = Validation::of('ü@ü.ü')->email();
+
+        // when
+        $ok = $validation->success();
+
+        // then
+        $this->assertTrue($ok);
+    }
+
+    public function test_email_fail()
+    {
+        // given
+        $validation = Validation::of('üü.ü')->email();
+
+        // when
+        $ok = $validation->success();
+
+        // then
+        $this->assertFalse($ok);
+    }
+
 }
