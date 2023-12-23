@@ -371,4 +371,76 @@ class ValidationTest extends TestCase
         $this->assertFalse($ok);
     }
 
+    public function test_date_success()
+    {
+        // given
+        $validation = Validation::of('2023-12-23')->date('Y-m-d');
+
+        // when
+        $ok = $validation->success();
+
+        // then
+        $this->assertTrue($ok);
+    }
+
+    public function test_date_fail()
+    {
+        // given
+        $validation = Validation::of('2023-02-30')->date('Y-m-d');
+
+        // when
+        $ok = $validation->success();
+
+        // then
+        $this->assertFalse($ok);
+    }
+
+    public function test_date_and_time_success()
+    {
+        // given
+        $validation = Validation::of('2023-02-10 13:59')->date('Y-m-d H:i');
+
+        // when
+        $ok = $validation->success();
+
+        // then
+        $this->assertTrue($ok);
+    }
+
+    public function test_date_and_time_fail()
+    {
+        // given
+        $validation = Validation::of('2023-02-10 13:61')->date('Y-m-d H:i');
+
+        // when
+        $ok = $validation->success();
+
+        // then
+        $this->assertFalse($ok);
+    }
+
+    public function test_date_format_fail()
+    {
+        // given
+        $validation = Validation::of('2023-2-10')->date('Y-m-d');
+
+        // when
+        $ok = $validation->success();
+
+        // then
+        $this->assertFalse($ok);
+    }
+
+    public function test_date_format_hr()
+    {
+        // given
+        $validation = Validation::of('2023-2-10')->date('Y-m-d');
+
+        // when
+        $result = $validation->result();
+
+        // then
+        $this->assertEquals('Date must be in YYYY-MM-DD format', $result->errors()->first()->message());
+    }
+
 }

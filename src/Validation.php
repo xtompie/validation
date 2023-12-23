@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Xtompie\Validation;
 
+use DateTime;
 use Xtompie\Result\Error;
 use Xtompie\Result\ErrorCollection;
 use Xtompie\Result\Result;
@@ -126,14 +127,24 @@ class Validation extends ValidationCore
         });
     }
 
-    public function date(string $format, ?string $msg = null): static
+    public function date(string $format, ?string $msg = null, array $hr = []): static
     {
-        return $this->validator(function (mixed $v) use ($format, $msg) {
-            $validator = new DateValidator($format);
-            return $validator->__invoke((string)$v)
-                ? Result::ofSuccess()
-                : Result::ofErrorMsg($this->errormsg('date', ['{format}' => $validator->hrFormat()], $msg), 'date')
-            ;
+        return $this->validator(function (mixed $v) use ($format, $msg, $hr) {
+            $t = DateTime::createFromFormat($format, (string)$v);
+            if ($t !== false && $t->format($format) === $v) {
+                return Result::ofSuccess();
+            }
+
+            $hr = $hr ?: [
+                'Y' => 'YYYY',
+                'm' => 'MM',
+                'd' => 'DD',
+                'H' => 'HH',
+                'i' => 'MM',
+                's' => 'SS',
+            ];
+            $formatHr = str_replace(array_keys($hr), array_values($hr), $format);
+            return Result::ofErrorMsg($this->errormsg('date', ['{format}' => $formatHr], $msg), 'date');
         });
     }
 
