@@ -29,7 +29,7 @@ PHP >= 8.0
 
 Using [composer](https://getcomposer.org/)
 
-```
+```shell
 composer require xtompie/validation
 ```
 
@@ -87,7 +87,6 @@ After nested() function targets are related to last target.
 Nested can be reset by `unested()`, `group()` or `main()` target.
 Nested can be composed in multiple levels downwards
 Space in error is automaticly generated.
-
 
 ### Filters
 
